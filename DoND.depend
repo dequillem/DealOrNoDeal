@@ -1,0 +1,25 @@
+# depslib dependency file v1.0
+1741267566 source:d:\minh folder\coding\proj\dond\main.cpp
+	<iostream>
+	<vector>
+	<algorithm>
+	<random>
+	<iomanip>
+
+1741268675 source:d:\minh folder\coding\proj\dond\screen.cpp
+	<SDL.h>
+	<SDL_ttf.h>
+	<iostream>
+	<vector>
+	<string>
+
+1741268191 d:\minh folder\coding\proj\dond\gamerules.h
+	<vector>
+
+1741268732 source:d:\minh folder\coding\proj\dond\gamerules.cpp
+	<iostream>
+	<vector>
+	<algorithm>
+	<random>
+	<iomanip>
+
