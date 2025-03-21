@@ -1,15 +1,17 @@
 #include <SDL2/SDL.h>
-#include <SDL_ttf.h>
-#include <SDL_image.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 #include <iostream>
 #include <vector>
 #include <string>
-#include <random>
-#include <algorithm>
-#include <iomanip>
 #include "gamerules.h"
+#include "casescene.h"
+#include "mainmenu.h"
+#include "banker.h"
+#include "finalround.h"
 
 using namespace std;
+
 const int SCREEN_WIDTH = 1280;
 const int SCREEN_HEIGHT = 720;
 const int CASE_SIZE = 80;
@@ -29,30 +31,25 @@ const vector<int> amounts = {
 void initializeSDL() {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         cerr << "SDL could not initialize! SDL_Error: " << SDL_GetError() << endl;
-        exit(1);
     }
 
     if (TTF_Init() == -1) {
         cerr << "TTF could not initialize! TTF_Error: " << TTF_GetError() << endl;
-        exit(1);
     }
 
     window = SDL_CreateWindow("Deal or No Deal", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     if (window == nullptr) {
         cerr << "Window could not be created! SDL_Error: " << SDL_GetError() << endl;
-        exit(1);
     }
 
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (renderer == nullptr) {
         cerr << "Renderer could not be created! SDL_Error: " << SDL_GetError() << endl;
-        exit(1);
     }
 
-    font = TTF_OpenFont("assets/Montserrat-Bold.ttf", 30);
+    font = TTF_OpenFont("assets/Montserrat-Bold.ttf", 40);
     if (font == nullptr) {
         cerr << "Failed to load font! TTF_Error: " << TTF_GetError() << endl;
-        exit(1);
     }
 }
 
@@ -64,33 +61,7 @@ void closeSDL() {
     SDL_Quit();
 }
 
-void renderText(const string& text, int x, int y, SDL_Color color) {
-    SDL_Surface* surface = TTF_RenderText_Solid(font, text.c_str(), color);
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_Rect dstRect = { x, y, surface->w, surface->h };
-    SDL_RenderCopy(renderer, texture, nullptr, &dstRect);
-    SDL_FreeSurface(surface);
-    SDL_DestroyTexture(texture);
-}
-
-SDL_Texture* loadTexture(const string& filePath) {
-    SDL_Texture* texture = nullptr;
-    SDL_Surface* surface = IMG_Load(filePath.c_str());
-    if (surface == nullptr) {
-        cerr << "Failed to load image: " << SDL_GetError() << endl;
-        return nullptr;
-    }
-
-    texture = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_FreeSurface(surface);
-    if (texture == nullptr) {
-        cerr << "Failed to create texture: " << SDL_GetError() << endl;
-    }
-
-    return texture;
-}
-
-void renderCases(SDL_Texture* caseTexture) {
+void renderCases(SDL_Texture* caseTexture, const vector<int>& caseAmounts, const vector<bool>& openedCases) {
     int startX = (SCREEN_WIDTH - (6 * (CASE_SIZE + CASE_MARGIN))) / 2;
     int startY = (SCREEN_HEIGHT - (4 * (CASE_SIZE + CASE_MARGIN))) / 2;
 
@@ -102,31 +73,23 @@ void renderCases(SDL_Texture* caseTexture) {
 
         SDL_Rect caseRect = { x, y, CASE_SIZE, CASE_SIZE };
 
-        //case texture
-        SDL_RenderCopy(renderer, caseTexture, nullptr, &caseRect);
+        // Render the case texture only if it's not opened
+        if (!openedCases[i]) {
+            SDL_RenderCopy(renderer, caseTexture, nullptr, &caseRect);
+            // Render the case number
+            renderText(to_string(i + 1), x + CASE_SIZE / 4, y + CASE_SIZE / 4, { 0, 0, 0, 200 });
+        }
+    }
+}
 
-        //case number
-        renderText(to_string(i + 1), x + CASE_SIZE/4, y + CASE_SIZE/4, { 0, 0, 0, 200 });
-    }
-}
-SDL_Texture* loadTexture(const string &file, SDL_Renderer *renderer) {
-    SDL_Texture *texture = nullptr;
-    SDL_Surface *loadedImage = IMG_Load(file.c_str());
-    if (loadedImage != nullptr) {
-        texture = SDL_CreateTextureFromSurface(renderer, loadedImage);
-        SDL_FreeSurface(loadedImage);
-    }
-    return texture;
-}
-// case value on both sides
 void renderAmounts() {
     int startX = AMOUNT_MARGIN;
     int startY = (SCREEN_HEIGHT - (amounts.size() / 2 * 30)) / 2;
 
-    for (size_t i = 0; i < amounts.size(); ++i) {
+    for (int i = 0; i < (int)amounts.size(); ++i) {
         int x = startX;
         int y = startY + i * 30;
-        if (i >= amounts.size() / 2) {
+        if (i >= (int)amounts.size() / 2) {
             x = SCREEN_WIDTH - AMOUNT_MARGIN - 150;
             y = startY + (i - amounts.size() / 2) * 30;
         }
@@ -137,11 +100,10 @@ void renderAmounts() {
 
 int main(int argc, char* argv[]) {
     initializeSDL();
+
     vector<int> caseAmounts = shuffleAmounts();
-    for (int i=0; i<26; i++) {
-        cout << caseAmounts[i] << " ";
-    }
-    SDL_Texture* imageTexture = loadTexture("assets/background.png", renderer);
+    vector<bool> openedCases(26, false);
+    int playerCase = -1;
 
     SDL_Texture* caseTexture = loadTexture("assets/case.png");
     if (caseTexture == nullptr) {
@@ -150,28 +112,71 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    // Game loop
     bool quit = false;
-    SDL_Event e;
+    int round = 1;
+    int elimcases = roundcases(round);
 
     while (!quit) {
-        while (SDL_PollEvent(&e) != 0) {
-            if (e.type == SDL_QUIT) {
+        while (SDL_PollEvent(&event) != 0) {
+            if (event.type == SDL_QUIT) {
                 quit = true;
             }
+            else if (event.type == SDL_MOUSEBUTTONDOWN) {
+                int mouseX, mouseY;
+                SDL_GetMouseState(&mouseX, &mouseY);
+
+                int startX = (SCREEN_WIDTH - (6 * (CASE_SIZE + CASE_MARGIN))) / 2;
+                int startY = (SCREEN_HEIGHT - (4 * (CASE_SIZE + CASE_MARGIN))) / 2;
+
+                for (int i = 0; i < 26; ++i) {
+                    int row = i / 6;
+                    int col = i % 6;
+                    int x = startX + col * (CASE_SIZE + CASE_MARGIN);
+                    int y = startY + row * (CASE_SIZE + CASE_MARGIN);
+
+                    if (mouseX >= x && mouseX <= x + CASE_SIZE && mouseY >= y && mouseY <= y + CASE_SIZE) {
+                        if (playerCase == -1) {
+                            playerCase = i;
+                            openedCases[i] = true;
+                            cout << "Your case is: " << (i + 1) << endl;
+                        }
+                        else if (!openedCases[i] && elimcases > 0) {
+                            cout << "Round " << round << "! Remove " << elimcases << " cases." << endl;
+                            renderCaseScene(i, caseAmounts[i]);
+                            openedCases[i] = true;
+                            elimcases--;
+                            cout << "Case " << (i + 1) << " removed. Value: $" << caseAmounts[i] << endl;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+            SDL_RenderClear(renderer);
+            SDL_Texture* backgroundTexture = loadTexture("assets/background.png");
+            SDL_RenderCopy(renderer, backgroundTexture, nullptr, nullptr);
+            SDL_DestroyTexture(backgroundTexture);
+
+            renderCases(caseTexture, caseAmounts, openedCases);
+
+            if (playerCase != -1) {
+                renderText("Your case: " + to_string(playerCase + 1), 20, 60, { 255, 255, 255, 255 });
+            }
+
+            vector<int> remainingAmounts;
+            for (int i = 0; i < 26; ++i) {
+                if (!openedCases[i]) {
+                    remainingAmounts.push_back(caseAmounts[i]);
+                }
+            }
+            renderAmounts();
+
+            SDL_RenderPresent(renderer);
         }
-
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-        SDL_RenderClear(renderer);
-
-        SDL_RenderCopy(renderer, imageTexture, nullptr, nullptr);
-
-        renderCases(caseTexture);
-        renderAmounts();
-
-        SDL_RenderPresent(renderer);
-    }
-
     SDL_DestroyTexture(caseTexture);
     closeSDL();
     return 0;
 }
+
