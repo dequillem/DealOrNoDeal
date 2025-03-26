@@ -100,7 +100,29 @@ void renderAmounts() {
 
 int main(int argc, char* argv[]) {
     initializeSDL();
+    bool inMainMenu = true;
+    bool inGame = false;
+    string playerName = "";
 
+    SDL_Event event;
+    renderMainMenu(renderer, font, "assets/background.png");
+
+    while (inMainMenu) {
+        while (SDL_PollEvent(&event) != 0) {
+            if (event.type == SDL_QUIT) {
+                inMainMenu = false;
+            } else if (event.type == SDL_KEYDOWN) {
+                if (event.key.keysym.sym == SDLK_SPACE) {
+                    inMainMenu = false;
+                    inGame = true;
+                }
+            }
+        }
+    }
+
+    if (inGame) {
+        playerName = getname(renderer, font, "assets/background.png");
+        cout << "Player name: " << playerName << endl;
     vector<int> caseAmounts = shuffleAmounts();
     vector<bool> openedCases(26, false);
     int playerCase = -1;
@@ -160,7 +182,7 @@ int main(int argc, char* argv[]) {
             SDL_DestroyTexture(backgroundTexture);
 
             renderCases(caseTexture, caseAmounts, openedCases);
-
+            renderText("Player: " + playerName, 20, 20, { 255, 255, 255, 255 });
             if (playerCase != -1) {
                 renderText("Your case: " + to_string(playerCase + 1), 20, 60, { 255, 255, 255, 255 });
             }
@@ -175,7 +197,9 @@ int main(int argc, char* argv[]) {
 
             SDL_RenderPresent(renderer);
         }
+        }
     SDL_DestroyTexture(caseTexture);
+    }
     closeSDL();
     return 0;
 }
