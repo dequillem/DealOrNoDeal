@@ -169,7 +169,27 @@ int main(int argc, char* argv[]) {
                             openedCases[i] = true;
                             elimcases--;
                             cout << "Case " << (i + 1) << " removed. Value: $" << caseAmounts[i] << endl;
-                            break;
+
+                            if (elimcases == 0) {
+                                vector<int> remainingAmounts;
+                                for (int j = 0; j < 26; ++j) {
+                                    if (!openedCases[j]) {
+                                        remainingAmounts.push_back(caseAmounts[j]);
+                                    }
+                                }
+                                bool dealAccepted = false;
+                                renderBankerScene(remainingAmounts, dealAccepted);
+                                if (dealAccepted) {
+                                    renderCaseScene(playerCase, caseAmounts[playerCase]);
+                                    cout << "Deal! You win: $" << endl;
+                                    quit = true;
+                                }
+                                else {
+                                    cout << "No deal! Proceeding to the next round." << endl;
+                                    round++;
+                                    elimcases = roundcases(round);
+                                }
+                            }
                         }
                     }
                 }
