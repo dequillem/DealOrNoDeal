@@ -5,10 +5,6 @@
 
 using namespace std;
 
-//// Game amounts
-////extern const vector<double> amounts;
-//
-// Function declarations
 vector<int> shuffleAmounts();
 int calculateBankOffer(const vector<int>& remainingAmounts);
 int roundcases(int round);
