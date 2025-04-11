@@ -5,12 +5,9 @@
 #include <string>
 #include "casescene.h"
 #include "base.h"
+#include "const.h"
 using namespace std;
 
-extern const int SCREEN_WIDTH;
-extern const int SCREEN_HEIGHT;
-extern const int CASE_SIZE;
-extern const int AMOUNT_MARGIN;
 
 void renderCaseScene(int chosenCase, int caseValue) {
     SDL_Texture* caseTexture = loadTexture("assets/case.png");
@@ -46,19 +43,15 @@ void renderCaseScene(int chosenCase, int caseValue) {
 
         // Render the case number
         renderText(to_string(chosenCase + 1), (SCREEN_WIDTH - CASE_SIZE) / 2, (SCREEN_HEIGHT - CASE_SIZE) / 2, { 0, 150, 0, 255 });
-
-        // Check if 3 seconds have passed
         if (!valueRevealed && SDL_GetTicks() - startTime > 3000) {
             valueRevealed = true;
         }
-
 
         if (valueRevealed) {
             SDL_Surface* textSurface = TTF_RenderText_Solid(font, ("$" + to_string(caseValue)).c_str(), { 255, 255, 255, 255 });
             if (textSurface == nullptr) {
                 cerr << "Failed to render text surface: " << TTF_GetError() << endl;
             } else {
-                // Calculate the vertical position to center the text
                 int textWidth = textSurface->w;
                 int textHeight = textSurface->h;
                 int textX = (SCREEN_WIDTH - textWidth) / 2;
@@ -71,6 +64,7 @@ void renderCaseScene(int chosenCase, int caseValue) {
                 SDL_FreeSurface(textSurface);
                 SDL_DestroyTexture(textTexture);
             }
+            renderText("Press Space to Return", 100, 600, {255, 255, 255, 255});
         }
         SDL_DestroyTexture(backgroundTexture);
         SDL_RenderPresent(renderer);

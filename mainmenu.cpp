@@ -3,12 +3,10 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <string>
+#include "const.h"
 using namespace std;
 
-extern const int SCREEN_WIDTH;
-extern const int SCREEN_HEIGHT;
-extern const int CASE_SIZE;
-extern const int AMOUNT_MARGIN;
+
 
 void renderMainMenu(SDL_Renderer* renderer, TTF_Font* font, const string& backgroundPath) {
     SDL_Surface* backgroundSurface = IMG_Load(backgroundPath.c_str());

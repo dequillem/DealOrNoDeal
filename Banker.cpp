@@ -6,13 +6,8 @@
 #include "banker.h"
 #include "base.h"
 #include "gamerules.h"
-
+#include "const.h"
 using namespace std;
-
-extern const int SCREEN_WIDTH;
-extern const int SCREEN_HEIGHT;
-extern const int CASE_SIZE;
-extern const int AMOUNT_MARGIN;
 
 extern SDL_Renderer* renderer;
 extern TTF_Font* font;

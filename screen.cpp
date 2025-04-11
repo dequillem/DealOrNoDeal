@@ -9,14 +9,10 @@
 #include "mainmenu.h"
 #include "banker.h"
 #include "finalround.h"
+#include "greyout.h"
+#include "const.h"
 
 using namespace std;
-
-const int SCREEN_WIDTH = 1280;
-const int SCREEN_HEIGHT = 720;
-const int CASE_SIZE = 80;
-const int CASE_MARGIN = 20;
-const int AMOUNT_MARGIN = 20;
 
 SDL_Window* window = nullptr;
 SDL_Renderer* renderer = nullptr;
@@ -66,19 +62,16 @@ void renderCases(SDL_Texture* caseTexture, const vector<int>& caseAmounts, const
     int startY = (SCREEN_HEIGHT - (4 * (CASE_SIZE + CASE_MARGIN))) / 2;
 
     for (int i = 0; i < 26; ++i) {
+        if (openedCases[i]) continue;
+
         int row = i / 6;
         int col = i % 6;
         int x = startX + col * (CASE_SIZE + CASE_MARGIN);
         int y = startY + row * (CASE_SIZE + CASE_MARGIN);
 
-        SDL_Rect caseRect = { x, y, CASE_SIZE, CASE_SIZE };
-
-        // Render the case texture only if it's not opened
-        if (!openedCases[i]) {
-            SDL_RenderCopy(renderer, caseTexture, nullptr, &caseRect);
-            // Render the case number
-            renderText(to_string(i + 1), x + CASE_SIZE / 4, y + CASE_SIZE / 4, { 0, 0, 0, 200 });
-        }
+        SDL_Rect caseRect = {x, y, CASE_SIZE, CASE_SIZE};
+        SDL_RenderCopy(renderer, caseTexture, nullptr, &caseRect);
+        renderText(to_string(i + 1), x + CASE_SIZE / 4, y + CASE_SIZE / 4, {0, 0, 0, 200});
     }
 }
 
@@ -90,7 +83,7 @@ void renderAmounts() {
         int x = startX;
         int y = startY + i * 30;
         if (i >= (int)amounts.size() / 2) {
-            x = SCREEN_WIDTH - AMOUNT_MARGIN - 150;
+            x = SCREEN_WIDTH - AMOUNT_MARGIN - 200;
             y = startY + (i - amounts.size() / 2) * 30;
         }
 
@@ -98,128 +91,213 @@ void renderAmounts() {
     }
 }
 
-int main(int argc, char* argv[]) {
-    initializeSDL();
-    bool inMainMenu = true;
-    bool inGame = false;
-    string playerName = "";
+void showGameOverScreen(int winningAmount, bool& returnToMainMenu) {
+    SDL_Event e;
+    bool done = false;
 
-    SDL_Event event;
-    renderMainMenu(renderer, font, "assets/background.png");
-
-    while (inMainMenu) {
-        while (SDL_PollEvent(&event) != 0) {
-            if (event.type == SDL_QUIT) {
-                inMainMenu = false;
-            } else if (event.type == SDL_KEYDOWN) {
-                if (event.key.keysym.sym == SDLK_SPACE) {
-                    inMainMenu = false;
-                    inGame = true;
+    while (!done) {
+        while (SDL_PollEvent(&e) != 0) {
+            if (e.type == SDL_QUIT) {
+                done = true;
+                returnToMainMenu = false;
+            } else if (e.type == SDL_KEYDOWN) {
+                if (e.key.keysym.sym == SDLK_SPACE) {
+                    done = true;
+                    returnToMainMenu = true;
+                } else if (e.key.keysym.sym == SDLK_ESCAPE) {
+                    done = true;
+                    returnToMainMenu = false;
                 }
             }
         }
+
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderClear(renderer);
+
+        SDL_Texture* backgroundTexture = loadTexture("assets/background.png");
+        SDL_RenderCopy(renderer, backgroundTexture, nullptr, nullptr);
+        SDL_DestroyTexture(backgroundTexture);
+
+        renderText("Game Over!", 300, (SCREEN_HEIGHT - 100) / 2, {255, 255, 255, 255});
+        renderText("You won: $" + to_string(winningAmount), 300, (SCREEN_HEIGHT) / 2, {255, 255, 255, 255});
+        renderText("Press SPACE to return to main menu", 300, (SCREEN_HEIGHT + 100) / 2, {255, 255, 255, 255});
+        renderText("Press ESC to quit", 300, (SCREEN_HEIGHT + 200) / 2, {255, 255, 255, 255});
+
+        SDL_RenderPresent(renderer);
     }
+}
 
-    if (inGame) {
-        playerName = getname(renderer, font, "assets/background.png");
-        cout << "Player name: " << playerName << endl;
-    vector<int> caseAmounts = shuffleAmounts();
-    vector<bool> openedCases(26, false);
-    int playerCase = -1;
+int main(int argc, char* argv[]) {
+    initializeSDL();
 
-    SDL_Texture* caseTexture = loadTexture("assets/case.png");
-    if (caseTexture == nullptr) {
-        cerr << "Failed to load case texture!" << endl;
-        closeSDL();
-        return 1;
-    }
+    bool running = true;
 
-    // Game loop
-    bool quit = false;
-    int round = 1;
-    int elimcases = roundcases(round);
+    while (running) {
+        bool inMainMenu = true;
+        bool inGame = false;
+        string playerName = "";
 
-    while (!quit) {
-        while (SDL_PollEvent(&event) != 0) {
-            if (event.type == SDL_QUIT) {
-                quit = true;
+        renderMainMenu(renderer, font, "assets/background.png");
+
+        // Main menu loop
+        while (inMainMenu) {
+            SDL_Event event;
+            while (SDL_PollEvent(&event) != 0) {
+                if (event.type == SDL_QUIT) {
+                    inMainMenu = false;
+                    running = false;
+                } else if (event.type == SDL_KEYDOWN) {
+                    if (event.key.keysym.sym == SDLK_SPACE) {
+                        inMainMenu = false;
+                        inGame = true;
+                    } else if (event.key.keysym.sym == SDLK_ESCAPE) {
+                        inMainMenu = false;
+                        running = false;
+                    }
+                }
             }
-            else if (event.type == SDL_MOUSEBUTTONDOWN) {
-                int mouseX, mouseY;
-                SDL_GetMouseState(&mouseX, &mouseY);
+        }
 
-                int startX = (SCREEN_WIDTH - (6 * (CASE_SIZE + CASE_MARGIN))) / 2;
-                int startY = (SCREEN_HEIGHT - (4 * (CASE_SIZE + CASE_MARGIN))) / 2;
+        if (inGame) {
+            playerName = getname(renderer, font, "assets/background.png");
+            cout << "Player name: " << playerName << endl;
 
-                for (int i = 0; i < 26; ++i) {
-                    int row = i / 6;
-                    int col = i % 6;
-                    int x = startX + col * (CASE_SIZE + CASE_MARGIN);
-                    int y = startY + row * (CASE_SIZE + CASE_MARGIN);
+            vector<int> caseAmounts = shuffleAmounts();
+            vector<bool> openedCases(26, false);
+            int playerCase = -1;
 
-                    if (mouseX >= x && mouseX <= x + CASE_SIZE && mouseY >= y && mouseY <= y + CASE_SIZE) {
-                        if (playerCase == -1) {
-                            playerCase = i;
-                            openedCases[i] = true;
-                            cout << "Your case is: " << (i + 1) << endl;
-                        }
-                        else if (!openedCases[i] && elimcases > 0) {
-                            cout << "Round " << round << "! Remove " << elimcases << " cases." << endl;
-                            renderCaseScene(i, caseAmounts[i]);
-                            openedCases[i] = true;
-                            elimcases--;
-                            cout << "Case " << (i + 1) << " removed. Value: $" << caseAmounts[i] << endl;
+            SDL_Texture* caseTexture = loadTexture("assets/case.png");
+            if (caseTexture == nullptr) {
+                cerr << "Failed to load case texture!" << endl;
+                closeSDL();
+                return 1;
+            }
 
-                            if (elimcases == 0) {
-                                vector<int> remainingAmounts;
-                                for (int j = 0; j < 26; ++j) {
-                                    if (!openedCases[j]) {
-                                        remainingAmounts.push_back(caseAmounts[j]);
+            // Game loop
+            bool gameFinished = false;
+            int round = 1;
+            int elimcases = roundcases(round);
+            int winningAmount = 0;
+            bool returnToMainMenu = false;
+
+            while (!gameFinished && running) {
+                SDL_Event event;
+                while (SDL_PollEvent(&event) != 0) {
+                    if (event.type == SDL_QUIT) {
+                        gameFinished = true;
+                        running = false;
+                    }
+                    else if (event.type == SDL_MOUSEBUTTONDOWN) {
+                        int mouseX, mouseY;
+                        SDL_GetMouseState(&mouseX, &mouseY);
+
+                        int startX = (SCREEN_WIDTH - (6 * (CASE_SIZE + CASE_MARGIN))) / 2;
+                        int startY = (SCREEN_HEIGHT - (4 * (CASE_SIZE + CASE_MARGIN))) / 2;
+
+                        for (int i = 0; i < 26; ++i) {
+                            int row = i / 6;
+                            int col = i % 6;
+                            int x = startX + col * (CASE_SIZE + CASE_MARGIN);
+                            int y = startY + row * (CASE_SIZE + CASE_MARGIN);
+
+                            if (mouseX >= x && mouseX <= x + CASE_SIZE && mouseY >= y && mouseY <= y + CASE_SIZE) {
+                                if (playerCase == -1) {
+                                    playerCase = i;
+                                    openedCases[i] = true;
+                                    cout << "Your case is: " << (i + 1) << endl;
+                                }
+                                else if (!openedCases[i] && elimcases > 0) {
+                                    cout << "Round " << round << "! Remove " << elimcases << " cases." << endl;
+                                    renderCaseScene(i, caseAmounts[i]);
+                                    openedCases[i] = true;
+                                    elimcases--;
+                                    cout << "Case " << (i + 1) << " removed. Value: $" << caseAmounts[i] << endl;
+
+                                    if (elimcases == 0) {
+                                        vector<int> remainingAmounts;
+                                        for (int j = 0; j < 26; ++j) {
+                                            if (!openedCases[j]) {
+                                                remainingAmounts.push_back(caseAmounts[j]);
+                                            }
+                                        }
+
+                                        bool dealAccepted = false;
+                                        renderBankerScene(remainingAmounts, dealAccepted);
+
+                                        if (dealAccepted) {
+                                            renderCaseScene(playerCase, caseAmounts[playerCase]);
+                                            winningAmount = calculateBankOffer(remainingAmounts);
+                                            cout << "Deal accepted! You win: $" << winningAmount << endl;
+                                            gameFinished = true;
+                                        }
+                                        else {
+                                            cout << "No deal! Proceeding to the next round." << endl;
+                                            round++;
+                                            elimcases = roundcases(round);
+                                        }
                                     }
                                 }
-                                bool dealAccepted = false;
-                                renderBankerScene(remainingAmounts, dealAccepted);
-                                if (dealAccepted) {
-                                    renderCaseScene(playerCase, caseAmounts[playerCase]);
-                                    cout << "Deal! You win: $" << endl;
-                                    quit = true;
+                                if (round == 10) {
+                                    int lastRemainingCase = -1;
+                                    for (int j = 0; j < 26; ++j) {
+                                        if (!openedCases[j] && j != playerCase) {
+                                            lastRemainingCase = j;
+                                            break;
+                                        }
+                                    }
+
+                                    finalRound(playerCase, lastRemainingCase, caseAmounts, winningAmount, returnToMainMenu);
+                                    cout << "You win: $" << winningAmount << endl;
+                                    gameFinished = true;
                                 }
-                                else {
-                                    cout << "No deal! Proceeding to the next round." << endl;
-                                    round++;
-                                    elimcases = roundcases(round);
-                                }
+                                break;
                             }
                         }
                     }
                 }
-            }
 
-            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-            SDL_RenderClear(renderer);
-            SDL_Texture* backgroundTexture = loadTexture("assets/background.png");
-            SDL_RenderCopy(renderer, backgroundTexture, nullptr, nullptr);
-            SDL_DestroyTexture(backgroundTexture);
+                if (!gameFinished) {
+                    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+                    SDL_RenderClear(renderer);
+                    SDL_Texture* backgroundTexture = loadTexture("assets/background.png");
+                    SDL_RenderCopy(renderer, backgroundTexture, nullptr, nullptr);
+                    SDL_DestroyTexture(backgroundTexture);
 
-            renderCases(caseTexture, caseAmounts, openedCases);
-            renderText("Player: " + playerName, 20, 20, { 255, 255, 255, 255 });
-            if (playerCase != -1) {
-                renderText("Your case: " + to_string(playerCase + 1), 20, 60, { 255, 255, 255, 255 });
-            }
+                    renderCases(caseTexture, caseAmounts, openedCases);
+                    renderOpenedCases(caseAmounts, openedCases);
 
-            vector<int> remainingAmounts;
-            for (int i = 0; i < 26; ++i) {
-                if (!openedCases[i]) {
-                    remainingAmounts.push_back(caseAmounts[i]);
+                    renderText("Player: " + playerName, 20, 20, { 255, 255, 255, 255 });
+                    if (playerCase != -1) {
+                        renderText("Your case: " + to_string(playerCase + 1), 20, 60, { 255, 255, 255, 255 });
+                    }
+
+                    vector<int> remainingAmounts;
+                    for (int i = 0; i < 26; ++i) {
+                        if (!openedCases[i]) {
+                            remainingAmounts.push_back(caseAmounts[i]);
+                        }
+                    }
+                    vector<int> openedAmounts;
+                    for (int i = 0; i < 26; ++i) {
+                        if (openedCases[i]) {
+                            openedAmounts.push_back(caseAmounts[i]);
+                        }
+                    }
+                    int playerCaseValue = (playerCase != -1) ? caseAmounts[playerCase] : -1;
+                    renderGreyedAmounts(openedAmounts, playerCaseValue);
+
+                    SDL_RenderPresent(renderer);
                 }
             }
-            renderAmounts();
 
-            SDL_RenderPresent(renderer);
+            SDL_DestroyTexture(caseTexture);
+
+            if (!returnToMainMenu && gameFinished) {
+                showGameOverScreen(winningAmount, returnToMainMenu);
+            }
         }
-        }
-    SDL_DestroyTexture(caseTexture);
     }
+
     closeSDL();
     return 0;
 }
