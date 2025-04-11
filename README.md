@@ -8,3 +8,4 @@ Update
 26/3 - Added main menu
 29/3 - Adjusting banker's offer in gamerules.cpp
 1/4 - Added Banker.cpp, showing the banker's offer at the end of a round
+11/4 - Added greyout.cpp to remove opened cases and values, updated all files
