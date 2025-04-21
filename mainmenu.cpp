@@ -5,9 +5,7 @@
 #include <string>
 #include "const.h"
 using namespace std;
-
-
-
+// Hàm in intro đầu game
 void renderMainMenu(SDL_Renderer* renderer, TTF_Font* font, const string& backgroundPath) {
     SDL_Surface* backgroundSurface = IMG_Load(backgroundPath.c_str());
     if (!backgroundSurface) {
@@ -27,7 +25,7 @@ void renderMainMenu(SDL_Renderer* renderer, TTF_Font* font, const string& backgr
         SDL_Color textColor = { 255, 255, 255, 255 };
         SDL_Surface* linesSurface = TTF_RenderText_Solid(font, lines[i].c_str(), textColor);
         SDL_Texture* linesTexture = SDL_CreateTextureFromSurface(renderer, linesSurface);
-        SDL_Rect linesRect = { (SCREEN_WIDTH - linesSurface->w) / 2, (SCREEN_HEIGHT - linesSurface->h) / 2 + 50 * i, linesSurface->w, linesSurface->h };
+        SDL_Rect linesRect = { (SCREEN_WIDTH - linesSurface->w) / 2, (SCREEN_HEIGHT - linesSurface->h) / 2 - 50 + 50 * i, linesSurface->w, linesSurface->h };
         SDL_RenderCopy(renderer, linesTexture, nullptr, &linesRect);
         SDL_FreeSurface(linesSurface);
         SDL_DestroyTexture(linesTexture);
@@ -35,23 +33,20 @@ void renderMainMenu(SDL_Renderer* renderer, TTF_Font* font, const string& backgr
         SDL_RenderPresent(renderer);
         SDL_Delay(1500);
     }
+    SDL_DestroyTexture(backgroundTexture);
+
+    SDL_Surface* menuBackgroundSurface = IMG_Load("assets/mainmenu.png");
+    SDL_Texture* menuBackgroundTexture = SDL_CreateTextureFromSurface(renderer, menuBackgroundSurface);
+    SDL_FreeSurface(menuBackgroundSurface);
+
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
-    SDL_RenderCopy(renderer, backgroundTexture, nullptr, nullptr);
-    SDL_RenderPresent(renderer);
-
-    string title = "Deal or No Deal";
-    SDL_Color textColor = { 255, 255, 255, 255 };
-    SDL_Surface* titleSurface = TTF_RenderText_Solid(font, title.c_str(), textColor);
-    SDL_Texture* titleTexture = SDL_CreateTextureFromSurface(renderer, titleSurface);
-    SDL_Rect titleRect = { (SCREEN_WIDTH - titleSurface->w) / 2, (SCREEN_HEIGHT - titleSurface->h) / 2 - 50, titleSurface->w, titleSurface->h };
-    SDL_RenderCopy(renderer, titleTexture, nullptr, &titleRect);
-    SDL_FreeSurface(titleSurface);
-    SDL_DestroyTexture(titleTexture);
+    SDL_RenderCopy(renderer, menuBackgroundTexture, nullptr, nullptr);
     string prompt = "Press Space to Play";
+    SDL_Color textColor = { 255, 255, 255, 255 };
     SDL_Surface* promptSurface = TTF_RenderText_Solid(font, prompt.c_str(), textColor);
     SDL_Texture* promptTexture = SDL_CreateTextureFromSurface(renderer, promptSurface);
-    SDL_Rect promptRect = { (SCREEN_WIDTH - promptSurface->w) / 2, (SCREEN_HEIGHT - promptSurface->h) / 2 + 50, promptSurface->w, promptSurface->h };
+    SDL_Rect promptRect = { (SCREEN_WIDTH - promptSurface->w) / 2, (SCREEN_HEIGHT - promptSurface->h) / 2 + 200, promptSurface->w, promptSurface->h };
     SDL_RenderCopy(renderer, promptTexture, nullptr, &promptRect);
     SDL_FreeSurface(promptSurface);
     SDL_DestroyTexture(promptTexture);
@@ -59,7 +54,7 @@ void renderMainMenu(SDL_Renderer* renderer, TTF_Font* font, const string& backgr
     SDL_RenderPresent(renderer);
     SDL_DestroyTexture(backgroundTexture);
 }
-
+// Hàm lấy tên người chơi
 string getname(SDL_Renderer* renderer, TTF_Font* font, const string& backgroundPath) {
     string name = "";
     SDL_Event e;
@@ -94,7 +89,6 @@ string getname(SDL_Renderer* renderer, TTF_Font* font, const string& backgroundP
         SDL_RenderCopy(renderer, backgroundTexture, nullptr, nullptr);
         SDL_DestroyTexture(backgroundTexture);
 
-        // Render the prompt
         string prompt = "Enter your name: " + name;
         SDL_Color textColor = { 255, 255, 255, 255 };
         SDL_Surface* promptSurface = TTF_RenderText_Solid(font, prompt.c_str(), textColor);

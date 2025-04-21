@@ -2,7 +2,7 @@
 #include "base.h"
 #include "const.h"
 using namespace std;
-
+// Hàm chuyển màu những giá trị đã loại bỏ để hỗ trợ người chơi
 void renderGreyedAmounts(const vector<int>& openedAmounts, int playerCaseValue) {
     int startX = AMOUNT_MARGIN;
     int startY = (SCREEN_HEIGHT - (amounts.size() / 2 * 30)) / 2;
@@ -22,13 +22,13 @@ void renderGreyedAmounts(const vector<int>& openedAmounts, int playerCaseValue) 
         if (isPlayerCase) {
             color = {255, 255, 255, 255};
         } else {
-            color = isOpened ? SDL_Color{100, 100, 100, 255} : SDL_Color{255, 255, 255, 255};
+            color = isOpened ? SDL_Color{100, 100, 100, 255} : SDL_Color{0, 150, 0, 255};
         }
 
         renderText("$" + to_string(amounts[i]), x, y, color);
     }
 }
-
+// Hàm chuyển màu những vali đã loại bỏ để hỗ trợ người chơi
 void renderOpenedCases(const vector<int>& caseAmounts, const vector<bool>& openedCases) {
     int startX = (SCREEN_WIDTH - (6 * (CASE_SIZE + CASE_MARGIN))) / 2;
     int startY = (SCREEN_HEIGHT - (4 * (CASE_SIZE + CASE_MARGIN))) / 2;

@@ -5,8 +5,9 @@
 #include "finalround.h"
 #include "base.h"
 #include "const.h"
+#include "casescene.h"
 using namespace std;
-
+// Hàm chuyển cảnh khi đến vòng cuối của chương trình
 void finalRound(int playerCase, int lastRemainingCase, const vector<int>& caseAmounts, int& winningAmount, bool& returnToMainMenu) {
     bool decisionMade = false;
     bool keepCase = false;
@@ -17,10 +18,10 @@ void finalRound(int playerCase, int lastRemainingCase, const vector<int>& caseAm
             if (e.type == SDL_QUIT) {
                 decisionMade = true;
             } else if (e.type == SDL_KEYDOWN) {
-                if (e.key.keysym.sym == SDLK_k) { // Press 'K' to keep the case
+                if (e.key.keysym.sym == SDLK_k) { // keep the case
                     keepCase = true;
                     decisionMade = true;
-                } else if (e.key.keysym.sym == SDLK_s) { // Press 'S' to switch cases
+                } else if (e.key.keysym.sym == SDLK_s) { //switch cases
                     keepCase = false;
                     decisionMade = true;
                 }
@@ -47,8 +48,10 @@ void finalRound(int playerCase, int lastRemainingCase, const vector<int>& caseAm
     }
 
     if (keepCase) {
+        renderCaseScene(playerCase, caseAmounts[playerCase]);
         winningAmount = caseAmounts[playerCase];
     } else {
+        renderCaseScene(lastRemainingCase, caseAmounts[lastRemainingCase]);
         winningAmount = caseAmounts[lastRemainingCase];
     }
 

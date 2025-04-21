@@ -56,7 +56,7 @@ void closeSDL() {
     TTF_Quit();
     SDL_Quit();
 }
-
+// Hàm in các vali trên màn hình
 void renderCases(SDL_Texture* caseTexture, const vector<int>& caseAmounts, const vector<bool>& openedCases) {
     int startX = (SCREEN_WIDTH - (6 * (CASE_SIZE + CASE_MARGIN))) / 2;
     int startY = (SCREEN_HEIGHT - (4 * (CASE_SIZE + CASE_MARGIN))) / 2;
@@ -74,23 +74,38 @@ void renderCases(SDL_Texture* caseTexture, const vector<int>& caseAmounts, const
         renderText(to_string(i + 1), x + CASE_SIZE / 4, y + CASE_SIZE / 4, {0, 0, 0, 200});
     }
 }
-
+// Hàm in các giá trị còn lại của vali trên màn hình
 void renderAmounts() {
+    const int VERTICAL_SPACING = 120;  // Increased from 90 to 120 for more separation
+    const int COLUMN_OFFSET_X = 200;   // Horizontal distance between columns
+
     int startX = AMOUNT_MARGIN;
-    int startY = (SCREEN_HEIGHT - (amounts.size() / 2 * 30)) / 2;
+    int startY = (SCREEN_HEIGHT - (amounts.size() / 2 * VERTICAL_SPACING)) / 2;
 
     for (int i = 0; i < (int)amounts.size(); ++i) {
         int x = startX;
-        int y = startY + i * 30;
+        int y = startY + i * VERTICAL_SPACING;
+
         if (i >= (int)amounts.size() / 2) {
-            x = SCREEN_WIDTH - AMOUNT_MARGIN - 200;
-            y = startY + (i - amounts.size() / 2) * 30;
+            x = SCREEN_WIDTH - AMOUNT_MARGIN - COLUMN_OFFSET_X;
+            y = startY + (i - amounts.size() / 2) * VERTICAL_SPACING;
         }
 
-        renderText("$" + to_string(amounts[i]), x, y, { 255, 255, 255, 255 });
+        renderText("$" + to_string(amounts[i]), x, y, { 0, 150, 0, 255 });
     }
 }
+// Hàm in số vali cần loại bỏ trong vòng hiện tại
+void renderRemainingCasesToRemove(int elimcases) {
+    string text = "Cases to remove: " + to_string(elimcases);
+    int textWidth, textHeight;
+    TTF_SizeText(font, text.c_str(), &textWidth, &textHeight);
 
+    int x = SCREEN_WIDTH - textWidth - 20;
+    int y = SCREEN_HEIGHT - textHeight - 20;
+
+    renderText(text, x, y, {255, 255, 255, 255});
+}
+// Hàm in game over sau khi hết 1 game
 void showGameOverScreen(int winningAmount, bool& returnToMainMenu) {
     SDL_Event e;
     bool done = false;
@@ -137,7 +152,7 @@ int main(int argc, char* argv[]) {
         bool inGame = false;
         string playerName = "";
 
-        renderMainMenu(renderer, font, "assets/background.png");
+        renderMainMenu(renderer, font, "assets/mainmenunotitle.png");
 
         // Main menu loop
         while (inMainMenu) {
@@ -179,7 +194,7 @@ int main(int argc, char* argv[]) {
             int elimcases = roundcases(round);
             int winningAmount = 0;
             bool returnToMainMenu = false;
-
+            // Trò chơi sẽ diễn ra cho đến khi người chơi chấp nhận offer hoặc mở cặp của mình
             while (!gameFinished && running) {
                 SDL_Event event;
                 while (SDL_PollEvent(&event) != 0) {
@@ -204,7 +219,7 @@ int main(int argc, char* argv[]) {
                                 if (playerCase == -1) {
                                     playerCase = i;
                                     openedCases[i] = true;
-                                    cout << "Your case is: " << (i + 1) << endl;
+                                    cout << "Your case is: " << (i + 1) << endl; // Ghi vali của người chơi qua console
                                 }
                                 else if (!openedCases[i] && elimcases > 0) {
                                     cout << "Round " << round << "! Remove " << elimcases << " cases." << endl;
@@ -212,7 +227,7 @@ int main(int argc, char* argv[]) {
                                     openedCases[i] = true;
                                     elimcases--;
                                     cout << "Case " << (i + 1) << " removed. Value: $" << caseAmounts[i] << endl;
-
+                                    // Chuyển cảnh qua lượt hỏi mua vali khi bỏ đủ vali trong vòng đấu xác định
                                     if (elimcases == 0) {
                                         vector<int> remainingAmounts;
                                         for (int j = 0; j < 26; ++j) {
@@ -237,6 +252,7 @@ int main(int argc, char* argv[]) {
                                         }
                                     }
                                 }
+                                // Nếu không chấp nhận offer, đến vòng 10 sẽ chọn mở vali của mình hoặc mở vali còn lại
                                 if (round == 10) {
                                     int lastRemainingCase = -1;
                                     for (int j = 0; j < 26; ++j) {
@@ -255,20 +271,20 @@ int main(int argc, char* argv[]) {
                         }
                     }
                 }
-
+                // Hàm in vali của người chơi, những vali còn trong game, và những giá trị còn trong game để hỗ trợ
                 if (!gameFinished) {
                     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
                     SDL_RenderClear(renderer);
-                    SDL_Texture* backgroundTexture = loadTexture("assets/background.png");
+                    SDL_Texture* backgroundTexture = loadTexture("assets/background3.png");
                     SDL_RenderCopy(renderer, backgroundTexture, nullptr, nullptr);
                     SDL_DestroyTexture(backgroundTexture);
 
                     renderCases(caseTexture, caseAmounts, openedCases);
                     renderOpenedCases(caseAmounts, openedCases);
 
-                    renderText("Player: " + playerName, 20, 20, { 255, 255, 255, 255 });
+                    renderText("Player: " + playerName, 20, 0, { 255, 255, 255, 255 });
                     if (playerCase != -1) {
-                        renderText("Your case: " + to_string(playerCase + 1), 20, 60, { 255, 255, 255, 255 });
+                        renderText("Your case: " + to_string(playerCase + 1), 20, 40, { 255, 255, 255, 255 });
                     }
 
                     vector<int> remainingAmounts;
@@ -285,7 +301,9 @@ int main(int argc, char* argv[]) {
                     }
                     int playerCaseValue = (playerCase != -1) ? caseAmounts[playerCase] : -1;
                     renderGreyedAmounts(openedAmounts, playerCaseValue);
-
+                    if (elimcases > 0 && playerCase != -1) {
+                        renderRemainingCasesToRemove(elimcases);
+                    }
                     SDL_RenderPresent(renderer);
                 }
             }

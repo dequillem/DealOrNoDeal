@@ -43,8 +43,36 @@
 			<Add directory="D:/Minh folder/RARs/SDL2_mixer-devel-2.8.1-mingw/SDL2_mixer-2.8.1/x86_64-w64-mingw32/lib" />
 			<Add directory="D:/Minh folder/RARs/SDL2_ttf-devel-2.24.0-mingw/SDL2_ttf-2.24.0/x86_64-w64-mingw32/lib" />
 		</Linker>
+		<Unit filename="Banker.cpp" />
+		<Unit filename="FinalRound.cpp" />
+		<Unit filename="banker.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="base.cpp" />
+		<Unit filename="base.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="casescene.cpp" />
+		<Unit filename="casescene.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="const.cpp" />
+		<Unit filename="const.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="finalround.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
 		<Unit filename="gamerules.cpp" />
 		<Unit filename="gamerules.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="greyout.cpp" />
+		<Unit filename="greyout.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="mainmenu.cpp" />
+		<Unit filename="mainmenu.h">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="screen.cpp" />

@@ -11,7 +11,7 @@ using namespace std;
 
 extern SDL_Renderer* renderer;
 extern TTF_Font* font;
-
+// Hàm chuyển cảnh lời hỏi mua của banker mỗi cuối vòng
 void renderBankerScene(const vector<int>& remainingAmounts, bool& dealAccepted) {
     bool quit = false;
     SDL_Event e;
@@ -32,10 +32,10 @@ void renderBankerScene(const vector<int>& remainingAmounts, bool& dealAccepted) 
             if (e.type == SDL_QUIT) {
                 quit = true;
             } else if (e.type == SDL_KEYDOWN) {
-                if (e.key.keysym.sym == SDLK_d) { //Deal
+                if (e.key.keysym.sym == SDLK_d) {
                     dealAccepted = true;
                     quit = true;
-                } else if (e.key.keysym.sym == SDLK_n) { //No Deal
+                } else if (e.key.keysym.sym == SDLK_n) {
                     dealAccepted = false;
                     quit = true;
                 }

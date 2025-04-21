@@ -7,7 +7,7 @@ using namespace std;
 
 extern SDL_Renderer* renderer;
 extern TTF_Font* font;
-
+// Hàm tải texture lên
 SDL_Texture* loadTexture(const string& filePath) {
     SDL_Texture* texture = nullptr;
     SDL_Surface* surface = IMG_Load(filePath.c_str());
@@ -24,7 +24,7 @@ SDL_Texture* loadTexture(const string& filePath) {
 
     return texture;
 }
-
+// Hàm in text
 void renderText(const string& text, int x, int y, SDL_Color color) {
     SDL_Surface* surface = TTF_RenderText_Solid(font, text.c_str(), color);
     if (surface == nullptr) {

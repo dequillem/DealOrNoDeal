@@ -13,7 +13,7 @@ const vector<int> amounts = {
     1000, 5000, 10000, 25000, 50000, 75000, 100000, 200000, 300000,
     400000, 500000, 750000, 1000000
 };
-
+// Tráo vali mỗi lần chơi
 vector<int> shuffleAmounts() {
     vector<int> shuffledAmounts = amounts;
     random_device rd;
@@ -29,16 +29,26 @@ void displayCases(const vector<int>& remainingCases) {
     }
     cout << endl;
 }
-
+// Hàm tính toán giá mà banker sẽ hỏi mua mỗi vòng dựa vào những giá trị vali còn lại
 int calculateBankOffer(const vector<int>& remainingAmounts) {
-    double sum = 0;
-    for (int amount : remainingAmounts) {
-        sum += (double)sqrt(amount);
+    if((int)remainingAmounts.size() > 10) {
+        double sum = 0;
+        for (int amount : remainingAmounts) {
+            sum += (double)sqrt(amount);
+        }
+        int average = (int)sum / remainingAmounts.size();
+        return average*average;
     }
-    int average = (int)sum / remainingAmounts.size();
-    return average*average;
-}
+    else {
+        double sum = 0;
+        for (int amount : remainingAmounts) {
+            sum += amount;
+        }
+        return sum/((int)remainingAmounts.size()+1);
+    }
 
+}
+// Hàm xét số vali cần bỏ mỗi vòng
 int roundcases(int round) {
     int elim = 0;
     switch (round) {

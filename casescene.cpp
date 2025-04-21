@@ -8,7 +8,7 @@
 #include "const.h"
 using namespace std;
 
-
+// Hàm chuyển cảnh mở vali trong trường hợp người chơi loại bỏ vali nào đó
 void renderCaseScene(int chosenCase, int caseValue) {
     SDL_Texture* caseTexture = loadTexture("assets/case.png");
     if (caseTexture == nullptr) {
@@ -41,7 +41,6 @@ void renderCaseScene(int chosenCase, int caseValue) {
         SDL_Rect caseRect = { x, y, CASE_SIZE * 5, CASE_SIZE * 5 };
         SDL_RenderCopy(renderer, caseTexture, nullptr, &caseRect);
 
-        // Render the case number
         renderText(to_string(chosenCase + 1), (SCREEN_WIDTH - CASE_SIZE) / 2, (SCREEN_HEIGHT - CASE_SIZE) / 2, { 0, 150, 0, 255 });
         if (!valueRevealed && SDL_GetTicks() - startTime > 3000) {
             valueRevealed = true;
