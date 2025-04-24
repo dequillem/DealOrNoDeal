@@ -1,6 +1,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_mixer.h>
 #include <iostream>
 #include <string>
 #include "banker.h"
@@ -9,24 +10,38 @@
 #include "const.h"
 using namespace std;
 
+//Mix_Chunk* soundEffect = nullptr;
+//Mix_Music* backgroundMusic = nullptr;
 extern SDL_Renderer* renderer;
 extern TTF_Font* font;
 // Hàm chuyển cảnh lời hỏi mua của banker mỗi cuối vòng
-void renderBankerScene(const vector<int>& remainingAmounts, bool& dealAccepted) {
+void renderBankerScene(const vector<int>& remainingAmounts, bool& dealAccepted, const int playercasevalue) {
     bool quit = false;
     SDL_Event e;
-
+    Mix_Chunk* ring = loadSoundEffect("assets/BankerPhoneRing.mp3");
+    if (!ring) {
+        cerr << "Failed to load case open sound effect!" << endl;
+    }
+    Mix_Chunk* dealed = loadSoundEffect("assets/AfterDeal.mp3");
+    if (!dealed) {
+        cerr << "Failed to load case open sound effect!" << endl;
+    }
+    Mix_Music* thinkmusic = loadMusic("assets/ThinkAfterBankOffer.mp3");
+    if (!thinkmusic) {
+        cerr << "Failed to load case open sound effect!" << endl;
+    }
     Uint32 startTime = SDL_GetTicks();
     bool offerRevealed = false;
     int bankOffer = 0;
-
+    bool callsfx = false;
+    bool playingmusic = false;
+    bool dealedPlayed = false;
     TTF_SetFontSize(font, 35);
 
     //fade effect
     Uint32 fadeStartTime = SDL_GetTicks();
     bool fadingOut = true;
     Uint8 alpha = 255;
-
     while (!quit) {
         while (SDL_PollEvent(&e) != 0) {
             if (e.type == SDL_QUIT) {
@@ -49,6 +64,10 @@ void renderBankerScene(const vector<int>& remainingAmounts, bool& dealAccepted) 
         SDL_DestroyTexture(backgroundTexture);
 
         Uint32 currentTime = SDL_GetTicks();
+        if(!callsfx) {
+            playSoundEffect(ring);
+            callsfx = true;
+        }
         if (fadingOut) {
             alpha = static_cast<Uint8>(255 - (currentTime - fadeStartTime) / 8);
             if (alpha <= 50) {
@@ -70,7 +89,7 @@ void renderBankerScene(const vector<int>& remainingAmounts, bool& dealAccepted) 
 
         if (!offerRevealed && SDL_GetTicks() - startTime > 4000) {
             offerRevealed = true;
-            bankOffer = calculateBankOffer(remainingAmounts);
+            bankOffer = calculateBankOffer(remainingAmounts, playercasevalue);
         }
 
         if (offerRevealed) {
@@ -79,6 +98,10 @@ void renderBankerScene(const vector<int>& remainingAmounts, bool& dealAccepted) 
 
             string promptText = "Press D to Deal, N to No Deal";
             renderText(promptText, (SCREEN_WIDTH - 700) / 2, (SCREEN_HEIGHT + 150) / 2 + 50, { 255, 255, 255, 255 });
+            if (!playingmusic && !dealAccepted) {
+                playMusic(thinkmusic);
+                playingmusic = true;
+            }
         }
         SDL_RenderPresent(renderer);
     }
@@ -90,6 +113,10 @@ void renderBankerScene(const vector<int>& remainingAmounts, bool& dealAccepted) 
                 if (e.type == SDL_QUIT || e.type == SDL_KEYDOWN) {
                     winScreenQuit = true;
                 }
+            }
+            if (!dealedPlayed) {
+                playSoundEffect(dealed);
+                dealedPlayed = true;
             }
             SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
             SDL_RenderClear(renderer);
@@ -106,4 +133,7 @@ void renderBankerScene(const vector<int>& remainingAmounts, bool& dealAccepted) 
     }
 
     TTF_SetFontSize(font, 40);
+    if (ring) Mix_FreeChunk(ring);
+    if (thinkmusic) Mix_FreeMusic(thinkmusic);
+    if (dealed) Mix_FreeChunk(dealed);
 }

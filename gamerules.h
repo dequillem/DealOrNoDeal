@@ -10,7 +10,7 @@ using namespace std;
 //
 // Function declarations
 vector<int> shuffleAmounts();
-int calculateBankOffer(const vector<int>& remainingAmounts);
+int calculateBankOffer(const vector<int>& remainingAmounts, const int playercasevalue);
 int roundcases(int round);
 
 #endif // GAMERULES_H

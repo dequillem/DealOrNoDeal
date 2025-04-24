@@ -20,7 +20,7 @@ void renderGreyedAmounts(const vector<int>& openedAmounts, int playerCaseValue) 
 
         SDL_Color color;
         if (isPlayerCase) {
-            color = {255, 255, 255, 255};
+            color = {0, 150, 0, 255};
         } else {
             color = isOpened ? SDL_Color{100, 100, 100, 255} : SDL_Color{0, 150, 0, 255};
         }

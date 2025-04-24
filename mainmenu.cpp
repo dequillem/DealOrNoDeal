@@ -2,16 +2,20 @@
 #include <iostream>
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL2/SDL_mixer.h>
 #include <string>
 #include "const.h"
+#include "base.h"
 using namespace std;
 // Hàm in intro đầu game
 void renderMainMenu(SDL_Renderer* renderer, TTF_Font* font, const string& backgroundPath) {
+
     SDL_Surface* backgroundSurface = IMG_Load(backgroundPath.c_str());
     if (!backgroundSurface) {
         cerr << "Failed to load background image: " << IMG_GetError() << endl;
         return;
     }
+
     SDL_Texture* backgroundTexture = SDL_CreateTextureFromSurface(renderer, backgroundSurface);
     SDL_FreeSurface(backgroundSurface);
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
@@ -103,7 +107,12 @@ string getname(SDL_Renderer* renderer, TTF_Font* font, const string& backgroundP
 
     return name;
 }
-
+void cleanupMainMenuMusic(Mix_Chunk* thememusic) {
+    if (thememusic) {
+        Mix_FreeChunk(thememusic);
+        thememusic = nullptr;
+    }
+}
 
 
 

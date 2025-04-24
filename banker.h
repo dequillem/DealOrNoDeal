@@ -5,6 +5,6 @@
 #include <string>
 using namespace std;
 
-void renderBankerScene(const vector<int>& remainingAmounts, bool& dealAccepted);
+void renderBankerScene(const vector<int>& remainingAmounts, bool& dealAccepted, const int playercasevalue);
 
 #endif // BANKER_H

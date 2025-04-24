@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_mixer.h>
 #include <iostream>
 #include <string>
 #include "finalround.h"
@@ -12,6 +13,11 @@ void finalRound(int playerCase, int lastRemainingCase, const vector<int>& caseAm
     bool decisionMade = false;
     bool keepCase = false;
     SDL_Event e;
+    Mix_Music* thinkmusic = loadMusic("assets/ThinkAfterBankOffer.mp3");
+    if (!thinkmusic) {
+        cerr << "Failed to load case open sound effect!" << endl;
+    }
+    bool playingmusic = false;
     Uint32 voicelinesTimer = SDL_GetTicks();
     while (!decisionMade) {
         while (SDL_PollEvent(&e) != 0) {
@@ -27,7 +33,10 @@ void finalRound(int playerCase, int lastRemainingCase, const vector<int>& caseAm
                 }
             }
         }
-
+        if (!playingmusic) {
+            playMusic(thinkmusic);
+            playingmusic = true;
+        }
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
         SDL_Texture* backgroundTexture = loadTexture("assets/background.png");
@@ -78,6 +87,7 @@ void finalRound(int playerCase, int lastRemainingCase, const vector<int>& caseAm
         renderText(promptText, (SCREEN_WIDTH - 300) / 2, (SCREEN_HEIGHT - 50) / 2 + 50, { 255, 255, 255, 255 });
         SDL_RenderPresent(renderer);
     }
+    if (thinkmusic) Mix_FreeMusic(thinkmusic);
 }
 
 

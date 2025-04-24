@@ -6,10 +6,11 @@
 	<random>
 	<iomanip>
 
-1744870027 source:d:\minh folder\coding\proj\dond\screen.cpp
+1745371089 source:d:\minh folder\coding\proj\dond\screen.cpp
 	<SDL2/SDL.h>
 	<SDL2/SDL_image.h>
 	<SDL2/SDL_ttf.h>
+	<SDL2/SDL_mixer.h>
 	<iostream>
 	<vector>
 	<string>
@@ -20,11 +21,12 @@
 	"finalround.h"
 	"greyout.h"
 	"const.h"
+	"base.h"
 
-1741703179 d:\minh folder\coding\proj\dond\gamerules.h
+1745370665 d:\minh folder\coding\proj\dond\gamerules.h
 	<vector>
 
-1744869825 source:d:\minh folder\coding\proj\dond\gamerules.cpp
+1745371157 source:d:\minh folder\coding\proj\dond\gamerules.cpp
 	<iostream>
 	<vector>
 	<algorithm>
@@ -453,39 +455,44 @@
 	<iostream>
 	<string>
 
-1741876251 d:\minh folder\coding\proj\dond\casescene.h
+1745337986 d:\minh folder\coding\proj\dond\casescene.h
 	<string>
 
-1741998690 d:\minh folder\coding\proj\dond\mainmenu.h
+1745338396 d:\minh folder\coding\proj\dond\mainmenu.h
 	<SDL2/SDL.h>
 	<SDL_ttf.h>
+	<SDL2/SDL_mixer.h>
 	<string>
 
-1744810518 source:d:\minh folder\coding\proj\dond\mainmenu.cpp
+1745338342 source:d:\minh folder\coding\proj\dond\mainmenu.cpp
 	"mainmenu.h"
 	<iostream>
 	<SDL.h>
 	<SDL_image.h>
+	<SDL2/SDL_mixer.h>
 	<string>
 	"const.h"
+	"base.h"
 
-1744450539 source:d:\minh folder\coding\proj\dond\base.cpp
+1745329583 source:d:\minh folder\coding\proj\dond\base.cpp
 	<SDL2/SDL.h>
 	<SDL2/SDL_image.h>
 	<SDL2/SDL_ttf.h>
+	<SDL2/SDL_mixer.h>
 	<iostream>
 	<string>
 
-1744450313 d:\minh folder\coding\proj\dond\base.h
+1745320040 d:\minh folder\coding\proj\dond\base.h
 	<SDL2/SDL.h>
 	<SDL2/SDL_image.h>
 	<SDL2/SDL_ttf.h>
 	<string>
 
-1744450539 source:d:\minh folder\coding\proj\dond\banker.cpp
+1745370665 source:d:\minh folder\coding\proj\dond\banker.cpp
 	<SDL2/SDL.h>
 	<SDL2/SDL_image.h>
 	<SDL2/SDL_ttf.h>
+	<SDL2/SDL_mixer.h>
 	<iostream>
 	<string>
 	"banker.h"
@@ -493,13 +500,14 @@
 	"gamerules.h"
 	"const.h"
 
-1744105491 d:\minh folder\coding\proj\dond\banker.h
+1745370684 d:\minh folder\coding\proj\dond\banker.h
 	<vector>
 	<string>
 
-1744869721 source:d:\minh folder\coding\proj\dond\finalround.cpp
+1745370217 source:d:\minh folder\coding\proj\dond\finalround.cpp
 	<SDL2/SDL.h>
 	<SDL2/SDL_ttf.h>
+	<SDL2/SDL_mixer.h>
 	<iostream>
 	<string>
 	"finalround.h"
@@ -513,7 +521,7 @@
 	<vector>
 	<string>
 
-1744450539 source:d:\minh folder\coding\proj\dond\casescene.cpp
+1745330798 source:d:\minh folder\coding\proj\dond\casescene.cpp
 	<SDL2/SDL.h>
 	<SDL2/SDL_image.h>
 	<SDL2/SDL_ttf.h>
@@ -522,6 +530,7 @@
 	"casescene.h"
 	"base.h"
 	"const.h"
+	<SDL2/SDL_mixer.h>
 
 1744384434 d:\minh folder\coding\proj\dond\greyout.h
 	<SDL2/SDL.h>
@@ -534,8 +543,17 @@
 1744729594 source:d:\minh folder\coding\proj\dond\const.cpp
 	"const.h"
 
-1744450539 source:d:\minh folder\coding\proj\dond\greyout.cpp
+1745317607 source:d:\minh folder\coding\proj\dond\greyout.cpp
 	"greyout.h"
 	"base.h"
 	"const.h"
+
+1738937080 d:\minh folder\rars\sdl2_mixer-devel-2.8.1-mingw\sdl2_mixer-2.8.1\x86_64-w64-mingw32\include\sdl2\sdl_mixer.h
+	"SDL_stdinc.h"
+	"SDL_rwops.h"
+	"SDL_audio.h"
+	"SDL_endian.h"
+	"SDL_version.h"
+	"begin_code.h"
+	"close_code.h"
 

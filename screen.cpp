@@ -1,6 +1,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_mixer.h>
 #include <iostream>
 #include <vector>
 #include <string>
@@ -11,13 +12,14 @@
 #include "finalround.h"
 #include "greyout.h"
 #include "const.h"
-
+#include "base.h"
 using namespace std;
 
 SDL_Window* window = nullptr;
 SDL_Renderer* renderer = nullptr;
 TTF_Font* font = nullptr;
-
+static Mix_Music* pickingCasesMusic = nullptr;
+static bool pickingMusicPlaying = false;
 const vector<int> amounts = {
     0, 1, 5, 10, 25, 50, 75, 100, 200, 300, 400, 500, 750,
     1000, 5000, 10000, 25000, 50000, 75000, 100000, 200000, 300000,
@@ -27,6 +29,10 @@ const vector<int> amounts = {
 void initializeSDL() {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         cerr << "SDL could not initialize! SDL_Error: " << SDL_GetError() << endl;
+    }
+
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+        cerr << "SDL_mixer could not initialize! Error: " << Mix_GetError() << endl;
     }
 
     if (TTF_Init() == -1) {
@@ -53,6 +59,7 @@ void closeSDL() {
     TTF_CloseFont(font);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+    Mix_CloseAudio();
     TTF_Quit();
     SDL_Quit();
 }
@@ -107,9 +114,17 @@ void renderRemainingCasesToRemove(int elimcases) {
 }
 // Hàm in game over sau khi hết 1 game
 void showGameOverScreen(int winningAmount, bool& returnToMainMenu) {
+    Mix_Chunk* dealed = loadSoundEffect("assets/AfterDeal.mp3");
+    if (!dealed) {
+        cerr << "Failed to load case open sound effect!" << endl;
+    }
     SDL_Event e;
     bool done = false;
-
+    bool music = false;
+    if (!music) {
+        playSoundEffect(dealed);
+        music = true;
+    }
     while (!done) {
         while (SDL_PollEvent(&e) != 0) {
             if (e.type == SDL_QUIT) {
@@ -140,6 +155,7 @@ void showGameOverScreen(int winningAmount, bool& returnToMainMenu) {
 
         SDL_RenderPresent(renderer);
     }
+    if (dealed) Mix_FreeChunk(dealed);
 }
 
 int main(int argc, char* argv[]) {
@@ -152,11 +168,20 @@ int main(int argc, char* argv[]) {
         bool inGame = false;
         string playerName = "";
 
-        renderMainMenu(renderer, font, "assets/mainmenunotitle.png");
 
+        Mix_Chunk* thememusic = loadSoundEffect("assets/Theme.mp3");
+        if (!thememusic) {
+            cerr << "Failed to load case open sound effect!" << endl;
+        }
+        bool themeplaying = false;
+        if (!themeplaying) {
+            playSoundEffect(thememusic);
+            themeplaying = true;
+        }
+        renderMainMenu(renderer, font, "assets/mainmenunotitle.png");
+        SDL_Event event;
         // Main menu loop
         while (inMainMenu) {
-            SDL_Event event;
             while (SDL_PollEvent(&event) != 0) {
                 if (event.type == SDL_QUIT) {
                     inMainMenu = false;
@@ -172,7 +197,7 @@ int main(int argc, char* argv[]) {
                 }
             }
         }
-
+        cleanupMainMenuMusic(thememusic);
         if (inGame) {
             playerName = getname(renderer, font, "assets/background.png");
             cout << "Player name: " << playerName << endl;
@@ -197,6 +222,13 @@ int main(int argc, char* argv[]) {
             // Trò chơi sẽ diễn ra cho đến khi người chơi chấp nhận offer hoặc mở cặp của mình
             while (!gameFinished && running) {
                 SDL_Event event;
+                if (!pickingCasesMusic && !pickingMusicPlaying) {
+                    pickingCasesMusic = loadMusic("assets/PickingCases.mp3");
+                    if (pickingCasesMusic) {
+                        playMusic(pickingCasesMusic, -1); // -1 for infinite loop
+                        pickingMusicPlaying = true;
+                    }
+                }
                 while (SDL_PollEvent(&event) != 0) {
                     if (event.type == SDL_QUIT) {
                         gameFinished = true;
@@ -228,7 +260,13 @@ int main(int argc, char* argv[]) {
                                     elimcases--;
                                     cout << "Case " << (i + 1) << " removed. Value: $" << caseAmounts[i] << endl;
                                     // Chuyển cảnh qua lượt hỏi mua vali khi bỏ đủ vali trong vòng đấu xác định
-                                    if (elimcases == 0) {
+                                    if (elimcases == 0 || gameFinished) {
+                                        if (pickingCasesMusic) {
+                                            Mix_HaltMusic();
+                                            Mix_FreeMusic(pickingCasesMusic);
+                                            pickingCasesMusic = nullptr;
+                                            pickingMusicPlaying = false;
+                                        }
                                         vector<int> remainingAmounts;
                                         for (int j = 0; j < 26; ++j) {
                                             if (!openedCases[j]) {
@@ -237,11 +275,11 @@ int main(int argc, char* argv[]) {
                                         }
 
                                         bool dealAccepted = false;
-                                        renderBankerScene(remainingAmounts, dealAccepted);
+                                        renderBankerScene(remainingAmounts, dealAccepted, caseAmounts[playerCase]);
 
                                         if (dealAccepted) {
                                             renderCaseScene(playerCase, caseAmounts[playerCase]);
-                                            winningAmount = calculateBankOffer(remainingAmounts);
+                                            winningAmount = calculateBankOffer(remainingAmounts, caseAmounts[playerCase]);
                                             cout << "Deal accepted! You win: $" << winningAmount << endl;
                                             gameFinished = true;
                                         }
@@ -315,7 +353,6 @@ int main(int argc, char* argv[]) {
             }
         }
     }
-
     closeSDL();
     return 0;
 }

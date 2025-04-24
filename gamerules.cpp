@@ -30,17 +30,17 @@ void displayCases(const vector<int>& remainingCases) {
     cout << endl;
 }
 // Hàm tính toán giá mà banker sẽ hỏi mua mỗi vòng dựa vào những giá trị vali còn lại
-int calculateBankOffer(const vector<int>& remainingAmounts) {
+int calculateBankOffer(const vector<int>& remainingAmounts, const int playercasevalue) {
     if((int)remainingAmounts.size() > 10) {
         double sum = 0;
         for (int amount : remainingAmounts) {
             sum += (double)sqrt(amount);
         }
         int average = (int)sum / remainingAmounts.size();
-        return average*average;
+        return average*average*0.8;
     }
     else {
-        double sum = 0;
+        double sum = playercasevalue;
         for (int amount : remainingAmounts) {
             sum += amount;
         }
