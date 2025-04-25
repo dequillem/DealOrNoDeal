@@ -7,5 +7,6 @@
 using namespace std;
 void renderMainMenu(SDL_Renderer* renderer, TTF_Font* font, const string& backgroundPath);
 string getname(SDL_Renderer* renderer, TTF_Font* font, const string& backgroundPath);
+void renderInstructions(SDL_Renderer* renderer, TTF_Font* font, bool& showInstructions);
 void cleanupMainMenuMusic(Mix_Chunk* thememusic);
 #endif // MAINMENU_H

@@ -45,7 +45,7 @@ void finalRound(int playerCase, int lastRemainingCase, const vector<int>& caseAm
 
         renderText("So we are at the final round, there are 2 cases left", 100, (SCREEN_HEIGHT - 50) / 2 - 50, { 255, 255, 255, 255 });
         if(SDL_GetTicks() - voicelinesTimer > 3000 ) {
-            renderText("You have 2 options:", 800, (SCREEN_HEIGHT - 50) / 2, { 255, 255, 255, 255 });
+            renderText("You have 2 options:", 100, (SCREEN_HEIGHT - 50) / 2, { 255, 255, 255, 255 });
         }
         if(SDL_GetTicks() - voicelinesTimer > 4000 ) {
             renderText("To keep your case, or to switch to the other one", 100, (SCREEN_HEIGHT - 50) / 2 + 50, { 255, 255, 255, 255 });

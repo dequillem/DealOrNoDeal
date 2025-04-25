@@ -15,7 +15,13 @@ void renderMainMenu(SDL_Renderer* renderer, TTF_Font* font, const string& backgr
         cerr << "Failed to load background image: " << IMG_GetError() << endl;
         return;
     }
-
+    static bool showInstructions = false;
+    SDL_Event e;
+    while (SDL_PollEvent(&e)) {
+        if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_i) {
+            showInstructions = !showInstructions; // Toggle instructions
+        }
+    }
     SDL_Texture* backgroundTexture = SDL_CreateTextureFromSurface(renderer, backgroundSurface);
     SDL_FreeSurface(backgroundSurface);
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
@@ -54,6 +60,16 @@ void renderMainMenu(SDL_Renderer* renderer, TTF_Font* font, const string& backgr
     SDL_RenderCopy(renderer, promptTexture, nullptr, &promptRect);
     SDL_FreeSurface(promptSurface);
     SDL_DestroyTexture(promptTexture);
+    string prompt2 = "Press I for instructions";
+    SDL_Surface* prompt2Surface = TTF_RenderText_Solid(font, prompt2.c_str(), textColor);
+    SDL_Texture* prompt2Texture = SDL_CreateTextureFromSurface(renderer, prompt2Surface);
+    SDL_Rect prompt2Rect = { (SCREEN_WIDTH - prompt2Surface->w) / 2, (SCREEN_HEIGHT - prompt2Surface->h) / 2 + 250, prompt2Surface->w, prompt2Surface->h };
+    SDL_RenderCopy(renderer, prompt2Texture, nullptr, &prompt2Rect);
+    SDL_FreeSurface(prompt2Surface);
+    SDL_DestroyTexture(prompt2Texture);
+
+    renderInstructions(renderer, font, showInstructions);
+    SDL_RenderPresent(renderer);
 
     SDL_RenderPresent(renderer);
     SDL_DestroyTexture(backgroundTexture);
@@ -113,7 +129,24 @@ void cleanupMainMenuMusic(Mix_Chunk* thememusic) {
         thememusic = nullptr;
     }
 }
+void renderInstructions(SDL_Renderer* renderer, TTF_Font* font, bool& showInstructions) {
+    if (!showInstructions) return;
 
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 50);
+    SDL_Rect overlay = {250, 220, 800, 300};
+    SDL_RenderFillRect(renderer, &overlay);
+
+    TTF_SetFontSize(font, 20);
+
+    renderText("After picking your case, select cases of the remaining 25 to remove. ", 290, (SCREEN_HEIGHT - 50) / 2 - 50, { 255, 255, 255, 255 });
+    renderText("You will receive an offer from the Banker, who wants to buy your case. ", 290, (SCREEN_HEIGHT - 50) / 2, { 255, 255, 255, 255 });
+    renderText("If you accept the deal, the game ends. If you refuse, you go to the ", 290, (SCREEN_HEIGHT - 50) / 2 + 50, { 255, 255, 255, 255 });
+    renderText("next round where you remove more cases, and the game goes on.", 290, (SCREEN_HEIGHT - 50) / 2 + 100, { 255, 255, 255, 255 });
+
+    // Reset font size
+    TTF_SetFontSize(font, 40);
+}
 
 
 

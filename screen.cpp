@@ -180,13 +180,18 @@ int main(int argc, char* argv[]) {
         }
         renderMainMenu(renderer, font, "assets/mainmenunotitle.png");
         SDL_Event event;
+        bool showInstructions = false;
         // Main menu loop
         while (inMainMenu) {
             while (SDL_PollEvent(&event) != 0) {
                 if (event.type == SDL_QUIT) {
                     inMainMenu = false;
                     running = false;
-                } else if (event.type == SDL_KEYDOWN) {
+                }
+                else if (event.type == SDL_KEYDOWN) {
+                    if (event.key.keysym.sym == SDLK_i) {
+                        showInstructions = !showInstructions;
+                    }
                     if (event.key.keysym.sym == SDLK_SPACE) {
                         inMainMenu = false;
                         inGame = true;
@@ -196,6 +201,11 @@ int main(int argc, char* argv[]) {
                     }
                 }
             }
+            if (showInstructions) {
+                renderInstructions(renderer, font, showInstructions);
+            }
+
+            SDL_RenderPresent(renderer);
         }
         cleanupMainMenuMusic(thememusic);
         if (inGame) {
