@@ -54,7 +54,7 @@
 
 ## 📺 Game References
 - Gameshow: https://www.youtube.com/@dealornodealuniverse
-- Gameplay demo: (https://drive.google.com/file/d/17o8eOFWp2zWgvQVL4EQrTTcv5MaGfwTt/view?usp=sharing
+- Gameplay demo: [https://drive.google.com/file/d/17o8eOFWp2zWgvQVL4EQrTTcv5MaGfwTt/view?usp=sharing](https://drive.google.com/file/d/16aD75EJjfxdPG6Lp6lYmFfOLn0NPwvGP/view?usp=drive_link)
 
 ## 🎵 Credits
 - **Sounds**: [Deal or No Deal Soundboard](https://www.101soundboards.com/boards/28512-deal-or-no-deal-soundboard)
